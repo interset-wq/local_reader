@@ -7,6 +7,8 @@ class StorageService {
   static const _lineHeightKey = 'line_height';
   static const _themeKey = 'theme_mode';
   static const _fontFamilyKey = 'font_family';
+  static const _brightnessKey = 'brightness';
+  static const _readingModeKey = 'reading_mode';
 
   static Future<List<Book>> loadBooks() async {
     final prefs = await SharedPreferences.getInstance();
@@ -58,5 +60,25 @@ class StorageService {
   static Future<void> saveFontFamily(String family) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_fontFamilyKey, family);
+  }
+
+  static Future<double> loadBrightness() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getDouble(_brightnessKey) ?? 1.0;
+  }
+
+  static Future<void> saveBrightness(double value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble(_brightnessKey, value);
+  }
+
+  static Future<int> loadReadingMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt(_readingModeKey) ?? 0; // 0=page, 1=scroll
+  }
+
+  static Future<void> saveReadingMode(int mode) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_readingModeKey, mode);
   }
 }

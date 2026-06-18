@@ -15,29 +15,80 @@ class SettingsScreen extends StatelessWidget {
             children: [
               _SectionTitle(title: '主题'),
               _ThemeSelector(settings: settings),
-              const Divider(),
-              _SectionTitle(title: '字体大小: ${settings.fontSize.round()}'),
-              Slider(
-                value: settings.fontSize,
-                min: 14,
-                max: 28,
-                divisions: 14,
-                onChanged: (v) => settings.setFontSize(v),
+              const Divider(height: 24),
+              _SectionTitle(title: '阅读模式'),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Row(
+                  children: [
+                    _ModeButton(
+                      icon: Icons.swipe,
+                      label: '翻页',
+                      selected: settings.readingMode == 0,
+                      onTap: () => settings.setReadingMode(0),
+                    ),
+                    const SizedBox(width: 12),
+                    _ModeButton(
+                      icon: Icons.swap_vert,
+                      label: '滚动',
+                      selected: settings.readingMode == 1,
+                      onTap: () => settings.setReadingMode(1),
+                    ),
+                  ],
+                ),
               ),
-              const Divider(),
+              const Divider(height: 24),
+              _SectionTitle(title: '字体大小: ${settings.fontSize.round()}'),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Slider(
+                  value: settings.fontSize,
+                  min: 14,
+                  max: 28,
+                  divisions: 14,
+                  label: '${settings.fontSize.round()}',
+                  onChanged: (v) => settings.setFontSize(v),
+                ),
+              ),
+              const Divider(height: 24),
               _SectionTitle(
                 title: '行高: ${settings.lineHeight.toStringAsFixed(1)}',
               ),
-              Slider(
-                value: settings.lineHeight,
-                min: 1.2,
-                max: 2.5,
-                divisions: 13,
-                onChanged: (v) => settings.setLineHeight(v),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Slider(
+                  value: settings.lineHeight,
+                  min: 1.2,
+                  max: 2.5,
+                  divisions: 13,
+                  label: settings.lineHeight.toStringAsFixed(1),
+                  onChanged: (v) => settings.setLineHeight(v),
+                ),
               ),
-              const Divider(),
+              const Divider(height: 24),
               _SectionTitle(title: '字体'),
               _FontSelector(settings: settings),
+              const Divider(height: 24),
+              _SectionTitle(title: '屏幕亮度'),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                child: Row(
+                  children: [
+                    const Icon(Icons.brightness_low, size: 20),
+                    Expanded(
+                      child: Slider(
+                        value: settings.brightness,
+                        min: 0.1,
+                        max: 1.0,
+                        divisions: 9,
+                        onChanged: (v) => settings.setBrightness(v),
+                      ),
+                    ),
+                    const Icon(Icons.brightness_high, size: 20),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 32),
             ],
           ),
         );
@@ -53,7 +104,7 @@ class _SectionTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
       child: Text(
         title,
         style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
@@ -133,6 +184,51 @@ class _ThemeButton extends StatelessWidget {
         child: Text(
           label,
           style: TextStyle(color: textColor, fontWeight: FontWeight.w600),
+        ),
+      ),
+    );
+  }
+}
+
+class _ModeButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _ModeButton({
+    required this.icon,
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        decoration: BoxDecoration(
+          color: selected ? Colors.brown.shade50 : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: selected ? Colors.brown : Colors.grey.shade300,
+            width: selected ? 2 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 18, color: selected ? Colors.brown : Colors.grey),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: TextStyle(
+                color: selected ? Colors.brown : Colors.grey,
+                fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
+              ),
+            ),
+          ],
         ),
       ),
     );

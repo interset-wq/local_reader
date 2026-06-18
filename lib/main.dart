@@ -18,14 +18,18 @@ void main() {
 class AppSettings extends ChangeNotifier {
   double _fontSize = 18.0;
   double _lineHeight = 1.8;
-  int _themeMode = 0; // 0=light, 1=dark, 2=sepia
+  int _themeMode = 0;
   String _fontFamily = 'serif';
+  double _brightness = 1.0;
+  int _readingMode = 0;
   List<Book> _books = [];
 
   double get fontSize => _fontSize;
   double get lineHeight => _lineHeight;
   int get themeMode => _themeMode;
   String get fontFamily => _fontFamily;
+  double get brightness => _brightness;
+  int get readingMode => _readingMode;
   List<Book> get books => _books;
 
   ThemeData get currentTheme {
@@ -44,6 +48,8 @@ class AppSettings extends ChangeNotifier {
     _lineHeight = await StorageService.loadLineHeight();
     _themeMode = await StorageService.loadThemeMode();
     _fontFamily = await StorageService.loadFontFamily();
+    _brightness = await StorageService.loadBrightness();
+    _readingMode = await StorageService.loadReadingMode();
     _books = await StorageService.loadBooks();
     notifyListeners();
   }
@@ -72,6 +78,18 @@ class AppSettings extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> setBrightness(double v) async {
+    _brightness = v;
+    await StorageService.saveBrightness(v);
+    notifyListeners();
+  }
+
+  Future<void> setReadingMode(int v) async {
+    _readingMode = v;
+    await StorageService.saveReadingMode(v);
+    notifyListeners();
+  }
+
   Future<void> addBook(Book book) async {
     _books.insert(0, book);
     await StorageService.saveBooks(_books);
@@ -84,10 +102,28 @@ class AppSettings extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> updateBookProgress(Book book) async {
+  Future<void> updateBook(Book book) async {
     final idx = _books.indexWhere((b) => b.id == book.id);
     if (idx >= 0) {
       _books[idx] = book;
+      await StorageService.saveBooks(_books);
+      notifyListeners();
+    }
+  }
+
+  Future<void> addBookmark(String bookId, Bookmark bookmark) async {
+    final idx = _books.indexWhere((b) => b.id == bookId);
+    if (idx >= 0) {
+      _books[idx].bookmarks.insert(0, bookmark);
+      await StorageService.saveBooks(_books);
+      notifyListeners();
+    }
+  }
+
+  Future<void> removeBookmark(String bookId, String bookmarkId) async {
+    final idx = _books.indexWhere((b) => b.id == bookId);
+    if (idx >= 0) {
+      _books[idx].bookmarks.removeWhere((b) => b.id == bookmarkId);
       await StorageService.saveBooks(_books);
       notifyListeners();
     }
