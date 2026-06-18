@@ -18,10 +18,10 @@ void main() {
 class AppSettings extends ChangeNotifier {
   double _fontSize = 18.0;
   double _lineHeight = 1.8;
-  int _themeMode = 0;
+  int _themeMode = 0; // 0=white, 1=sepia, 2=dark, 3=black
   String _fontFamily = 'serif';
   double _brightness = 1.0;
-  int _readingMode = 0;
+  int _readingMode = 0; // 0=page, 1=scroll
   List<Book> _books = [];
 
   double get fontSize => _fontSize;
@@ -32,16 +32,7 @@ class AppSettings extends ChangeNotifier {
   int get readingMode => _readingMode;
   List<Book> get books => _books;
 
-  ThemeData get currentTheme {
-    switch (_themeMode) {
-      case 1:
-        return AppTheme.darkTheme;
-      case 2:
-        return AppTheme.sepiaTheme;
-      default:
-        return AppTheme.lightTheme;
-    }
-  }
+  ThemeData get currentTheme => AppTheme.buildTheme(_themeMode);
 
   Future<void> loadAll() async {
     _fontSize = await StorageService.loadFontSize();
@@ -137,19 +128,30 @@ class LocalReaderApp extends StatefulWidget {
   State<LocalReaderApp> createState() => _LocalReaderAppState();
 }
 
-class _LocalReaderAppState extends State<LocalReaderApp> {
+class _LocalReaderAppState extends State<LocalReaderApp> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     Future.microtask(() {
-      if (mounted) context.read<AppSettings>().loadAll();
+      if (mounted) {
+        context.read<AppSettings>().loadAll();
+        AppTheme.setSystemUi(context.read<AppSettings>().themeMode);
+      }
     });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Consumer<AppSettings>(
       builder: (context, settings, _) {
+        AppTheme.setSystemUi(settings.themeMode);
         return MaterialApp(
           title: 'Local Reader',
           theme: settings.currentTheme,

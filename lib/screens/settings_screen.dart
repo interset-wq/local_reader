@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../main.dart';
+import '../theme/app_theme.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -9,85 +10,191 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<AppSettings>(
       builder: (context, settings, _) {
+        final mode = settings.themeMode;
+
         return Scaffold(
-          appBar: AppBar(title: const Text('设置')),
+          backgroundColor: AppTheme.scaffoldBg(mode),
+          appBar: AppBar(
+            title: Text(
+              '设置',
+              style: TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.textPrimary(mode),
+              ),
+            ),
+          ),
           body: ListView(
             children: [
-              _SectionTitle(title: '主题'),
-              _ThemeSelector(settings: settings),
-              const Divider(height: 24),
-              _SectionTitle(title: '阅读模式'),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Row(
+              _buildSection(context, '阅读模式', mode, [
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Row(
+                    children: [
+                      _ModeChip(
+                        icon: Icons.swipe,
+                        label: '翻页',
+                        selected: settings.readingMode == 0,
+                        mode: mode,
+                        onTap: () => settings.setReadingMode(0),
+                      ),
+                      const SizedBox(width: 12),
+                      _ModeChip(
+                        icon: Icons.swap_vert,
+                        label: '滚动',
+                        selected: settings.readingMode == 1,
+                        mode: mode,
+                        onTap: () => settings.setReadingMode(1),
+                      ),
+                    ],
+                  ),
+                ),
+              ]),
+              _buildDivider(mode),
+              _buildSection(context, '字体大小', mode, [
+                Row(
                   children: [
-                    _ModeButton(
-                      icon: Icons.swipe,
-                      label: '翻页',
-                      selected: settings.readingMode == 0,
-                      onTap: () => settings.setReadingMode(0),
-                    ),
-                    const SizedBox(width: 12),
-                    _ModeButton(
-                      icon: Icons.swap_vert,
-                      label: '滚动',
-                      selected: settings.readingMode == 1,
-                      onTap: () => settings.setReadingMode(1),
-                    ),
-                  ],
-                ),
-              ),
-              const Divider(height: 24),
-              _SectionTitle(title: '字体大小: ${settings.fontSize.round()}'),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Slider(
-                  value: settings.fontSize,
-                  min: 14,
-                  max: 28,
-                  divisions: 14,
-                  label: '${settings.fontSize.round()}',
-                  onChanged: (v) => settings.setFontSize(v),
-                ),
-              ),
-              const Divider(height: 24),
-              _SectionTitle(
-                title: '行高: ${settings.lineHeight.toStringAsFixed(1)}',
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Slider(
-                  value: settings.lineHeight,
-                  min: 1.2,
-                  max: 2.5,
-                  divisions: 13,
-                  label: settings.lineHeight.toStringAsFixed(1),
-                  onChanged: (v) => settings.setLineHeight(v),
-                ),
-              ),
-              const Divider(height: 24),
-              _SectionTitle(title: '字体'),
-              _FontSelector(settings: settings),
-              const Divider(height: 24),
-              _SectionTitle(title: '屏幕亮度'),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                child: Row(
-                  children: [
-                    const Icon(Icons.brightness_low, size: 20),
+                    Text('A',
+                        style: TextStyle(
+                            fontSize: 14,
+                            color: AppTheme.textSecondary(mode))),
                     Expanded(
-                      child: Slider(
-                        value: settings.brightness,
-                        min: 0.1,
-                        max: 1.0,
-                        divisions: 9,
-                        onChanged: (v) => settings.setBrightness(v),
+                      child: SliderTheme(
+                        data: SliderThemeData(
+                          activeTrackColor: AppTheme.accent(mode),
+                          inactiveTrackColor: AppTheme.divider(mode),
+                          thumbColor: AppTheme.accent(mode),
+                          thumbShape: const RoundSliderThumbShape(
+                              enabledThumbRadius: 6),
+                          trackHeight: 2,
+                        ),
+                        child: Slider(
+                          value: settings.fontSize,
+                          min: 14,
+                          max: 28,
+                          divisions: 14,
+                          onChanged: (v) => settings.setFontSize(v),
+                        ),
                       ),
                     ),
-                    const Icon(Icons.brightness_high, size: 20),
+                    Text('A',
+                        style: TextStyle(
+                            fontSize: 22,
+                            color: AppTheme.textSecondary(mode))),
+                    const SizedBox(width: 8),
+                    SizedBox(
+                      width: 28,
+                      child: Text(
+                        '${settings.fontSize.round()}',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: AppTheme.textSecondary(mode),
+                        ),
+                        textAlign: TextAlign.right,
+                      ),
+                    ),
                   ],
                 ),
-              ),
+              ]),
+              _buildDivider(mode),
+              _buildSection(context, '行高', mode, [
+                Row(
+                  children: [
+                    Icon(Icons.format_line_spacing,
+                        size: 18, color: AppTheme.textSecondary(mode)),
+                    Expanded(
+                      child: SliderTheme(
+                        data: SliderThemeData(
+                          activeTrackColor: AppTheme.accent(mode),
+                          inactiveTrackColor: AppTheme.divider(mode),
+                          thumbColor: AppTheme.accent(mode),
+                          thumbShape: const RoundSliderThumbShape(
+                              enabledThumbRadius: 6),
+                          trackHeight: 2,
+                        ),
+                        child: Slider(
+                          value: settings.lineHeight,
+                          min: 1.2,
+                          max: 2.5,
+                          divisions: 13,
+                          onChanged: (v) => settings.setLineHeight(v),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 28,
+                      child: Text(
+                        settings.lineHeight.toStringAsFixed(1),
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: AppTheme.textSecondary(mode),
+                        ),
+                        textAlign: TextAlign.right,
+                      ),
+                    ),
+                  ],
+                ),
+              ]),
+              _buildDivider(mode),
+              _buildSection(context, '字体', mode, [
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Row(
+                    children: [
+                      _FontChip(
+                        label: '宋体',
+                        selected: settings.fontFamily == 'serif',
+                        mode: mode,
+                        onTap: () => settings.setFontFamily('serif'),
+                      ),
+                      const SizedBox(width: 8),
+                      _FontChip(
+                        label: '黑体',
+                        selected: settings.fontFamily == 'sans-serif',
+                        mode: mode,
+                        onTap: () => settings.setFontFamily('sans-serif'),
+                      ),
+                      const SizedBox(width: 8),
+                      _FontChip(
+                        label: '等宽',
+                        selected: settings.fontFamily == 'monospace',
+                        mode: mode,
+                        onTap: () => settings.setFontFamily('monospace'),
+                      ),
+                    ],
+                  ),
+                ),
+              ]),
+              _buildDivider(mode),
+              _buildSection(context, '亮度', mode, [
+                Row(
+                  children: [
+                    Icon(Icons.brightness_low,
+                        size: 18, color: AppTheme.textSecondary(mode)),
+                    Expanded(
+                      child: SliderTheme(
+                        data: SliderThemeData(
+                          activeTrackColor: AppTheme.accent(mode),
+                          inactiveTrackColor: AppTheme.divider(mode),
+                          thumbColor: AppTheme.accent(mode),
+                          thumbShape: const RoundSliderThumbShape(
+                              enabledThumbRadius: 6),
+                          trackHeight: 2,
+                        ),
+                        child: Slider(
+                          value: settings.brightness,
+                          min: 0.1,
+                          max: 1.0,
+                          divisions: 9,
+                          onChanged: (v) => settings.setBrightness(v),
+                        ),
+                      ),
+                    ),
+                    Icon(Icons.brightness_high,
+                        size: 18, color: AppTheme.textSecondary(mode)),
+                  ],
+                ),
+              ]),
               const SizedBox(height: 32),
             ],
           ),
@@ -95,111 +202,48 @@ class SettingsScreen extends StatelessWidget {
       },
     );
   }
-}
 
-class _SectionTitle extends StatelessWidget {
-  final String title;
-  const _SectionTitle({required this.title});
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildSection(
+      BuildContext context, String title, int mode, List<Widget> children) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-      child: Text(
-        title,
-        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-      ),
-    );
-  }
-}
-
-class _ThemeSelector extends StatelessWidget {
-  final AppSettings settings;
-  const _ThemeSelector({required this.settings});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _ThemeButton(
-            label: '日间',
-            color: const Color(0xFFFDF5E6),
-            textColor: Colors.brown.shade800,
-            selected: settings.themeMode == 0,
-            onTap: () => settings.setThemeMode(0),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: AppTheme.textSecondary(mode),
+            ),
           ),
-          const SizedBox(width: 12),
-          _ThemeButton(
-            label: '夜间',
-            color: const Color(0xFF1A1A1A),
-            textColor: Colors.white70,
-            selected: settings.themeMode == 1,
-            onTap: () => settings.setThemeMode(1),
-          ),
-          const SizedBox(width: 12),
-          _ThemeButton(
-            label: '护眼',
-            color: const Color(0xFFF5E6C8),
-            textColor: Colors.brown.shade800,
-            selected: settings.themeMode == 2,
-            onTap: () => settings.setThemeMode(2),
-          ),
+          ...children,
         ],
       ),
     );
   }
-}
 
-class _ThemeButton extends StatelessWidget {
-  final String label;
-  final Color color;
-  final Color textColor;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _ThemeButton({
-    required this.label,
-    required this.color,
-    required this.textColor,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: selected ? Colors.brown : Colors.grey.shade300,
-            width: selected ? 2 : 1,
-          ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(color: textColor, fontWeight: FontWeight.w600),
-        ),
-      ),
+  Widget _buildDivider(int mode) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Divider(color: AppTheme.divider(mode), height: 24),
     );
   }
 }
 
-class _ModeButton extends StatelessWidget {
+class _ModeChip extends StatelessWidget {
   final IconData icon;
   final String label;
   final bool selected;
+  final int mode;
   final VoidCallback onTap;
 
-  const _ModeButton({
+  const _ModeChip({
     required this.icon,
     required this.label,
     required this.selected,
+    required this.mode,
     required this.onTap,
   });
 
@@ -208,23 +252,31 @@ class _ModeButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         decoration: BoxDecoration(
-          color: selected ? Colors.brown.shade50 : Colors.transparent,
+          color: selected
+              ? AppTheme.accent(mode).withValues(alpha: 0.1)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: selected ? Colors.brown : Colors.grey.shade300,
-            width: selected ? 2 : 1,
+            color: selected ? AppTheme.accent(mode) : AppTheme.divider(mode),
+            width: selected ? 1.5 : 0.5,
           ),
         ),
         child: Row(
           children: [
-            Icon(icon, size: 18, color: selected ? Colors.brown : Colors.grey),
+            Icon(icon,
+                size: 18,
+                color: selected
+                    ? AppTheme.accent(mode)
+                    : AppTheme.textSecondary(mode)),
             const SizedBox(width: 8),
             Text(
               label,
               style: TextStyle(
-                color: selected ? Colors.brown : Colors.grey,
+                color: selected
+                    ? AppTheme.accent(mode)
+                    : AppTheme.textPrimary(mode),
                 fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
               ),
             ),
@@ -235,32 +287,44 @@ class _ModeButton extends StatelessWidget {
   }
 }
 
-class _FontSelector extends StatelessWidget {
-  final AppSettings settings;
-  const _FontSelector({required this.settings});
+class _FontChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final int mode;
+  final VoidCallback onTap;
 
-  static const _fonts = [
-    ('serif', '宋体'),
-    ('sans-serif', '黑体'),
-    ('monospace', '等宽'),
-  ];
+  const _FontChip({
+    required this.label,
+    required this.selected,
+    required this.mode,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        children: _fonts.map((f) {
-          final selected = settings.fontFamily == f.$1;
-          return Padding(
-            padding: const EdgeInsets.only(right: 12),
-            child: ChoiceChip(
-              label: Text(f.$2),
-              selected: selected,
-              onSelected: (_) => settings.setFontFamily(f.$1),
-            ),
-          );
-        }).toList(),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        decoration: BoxDecoration(
+          color: selected
+              ? AppTheme.accent(mode).withValues(alpha: 0.1)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: selected ? AppTheme.accent(mode) : AppTheme.divider(mode),
+            width: selected ? 1.5 : 0.5,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 14,
+            color:
+                selected ? AppTheme.accent(mode) : AppTheme.textPrimary(mode),
+            fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
+          ),
+        ),
       ),
     );
   }

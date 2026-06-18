@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 
 class SearchScreen extends StatefulWidget {
   final List<String> chapters;
@@ -69,51 +70,98 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final mode = Theme.of(context).brightness == Brightness.dark ? 2 : 0;
+
     return Scaffold(
+      backgroundColor: AppTheme.scaffoldBg(mode),
       appBar: AppBar(
         title: TextField(
           controller: _controller,
           autofocus: true,
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             hintText: '搜索内容...',
             border: InputBorder.none,
-            hintStyle: TextStyle(color: Colors.grey),
+            hintStyle: TextStyle(
+              color: AppTheme.textSecondary(mode),
+              fontSize: 15,
+            ),
+          ),
+          style: TextStyle(
+            fontSize: 15,
+            color: AppTheme.textPrimary(mode),
           ),
           onSubmitted: _search,
           textInputAction: TextInputAction.search,
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.search),
+            icon: Icon(Icons.search,
+                color: AppTheme.textSecondary(mode), size: 20),
             onPressed: () => _search(_controller.text),
           ),
         ],
       ),
       body: !_searched
-          ? const Center(child: Text('输入关键词搜索全书内容'))
+          ? Center(
+              child: Text(
+                '输入关键词搜索全书内容',
+                style: TextStyle(
+                  color: AppTheme.textSecondary(mode),
+                  fontSize: 14,
+                ),
+              ),
+            )
           : _results.isEmpty
-              ? const Center(child: Text('未找到匹配内容'))
-              : ListView.builder(
+              ? Center(
+                  child: Text(
+                    '未找到匹配内容',
+                    style: TextStyle(
+                      color: AppTheme.textSecondary(mode),
+                      fontSize: 14,
+                    ),
+                  ),
+                )
+              : ListView.separated(
                   itemCount: _results.length,
+                  separatorBuilder: (_, __) => Divider(
+                    color: AppTheme.divider(mode),
+                    height: 1,
+                    indent: 60,
+                  ),
                   itemBuilder: (context, index) {
                     final r = _results[index];
-                    return ListTile(
-                      dense: true,
-                      leading: Text(
-                        '第${r.chapterIndex + 1}章',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.brown,
-                          fontWeight: FontWeight.w600,
+                    return InkWell(
+                      onTap: () => widget.onJumpToChapter(r.chapterIndex),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 14),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '${r.chapterIndex + 1}',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: AppTheme.textSecondary(mode),
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                r.context,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: AppTheme.textPrimary(mode),
+                                  height: 1.4,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      title: Text(
-                        r.context,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 14),
-                      ),
-                      onTap: () => widget.onJumpToChapter(r.chapterIndex),
                     );
                   },
                 ),

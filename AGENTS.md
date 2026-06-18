@@ -33,12 +33,12 @@ lib/
 │   ├── parser_service.dart    # TXT chapter splitting (regex) + EPUB parsing (epubx)
 │   └── storage_service.dart   # SharedPreferences persistence
 ├── screens/
-│   ├── home_screen.dart       # Bookshelf list, sorting, search, import, delete with file cleanup
-│   ├── reader_screen.dart     # Page/scroll reader, toolbar, brightness, bookmarks, chapter nav
+│   ├── home_screen.dart       # Bookshelf grid, continue-reading hero, search, import, delete
+│   ├── reader_screen.dart     # Page/scroll reader, Kindle-style toolbar, Aa menu, bookmarks
 │   ├── settings_screen.dart   # Theme, reading mode, font, line height, brightness
 │   ├── search_screen.dart     # Full-text search across all chapters
 │   └── bookmark_screen.dart   # Bookmark list with swipe-to-delete
-└── theme/app_theme.dart       # Three ThemeData definitions (light/dark/sepia)
+└── theme/app_theme.dart       # Theme system: white/sepia/dark/black with helper methods
 ```
 
 ## Key patterns
@@ -49,17 +49,20 @@ lib/
 - **EPUB parsing**: `epubx` package, strips HTML tags for plain-text rendering.
 - **Bookmarks**: Stored per-book in the `Book.bookmarks` list. Each bookmark records chapter index, char offset, and a text preview.
 - **Delete flow**: Removes book from list AND deletes the file from disk.
+- **Theme system**: 4 modes (white/sepia/dark/black). `AppTheme` provides colors via static helpers. System UI bar colors updated via `AppTheme.setSystemUi()`.
 
 ## Features
 
-- Bookshelf with sorting (recent/title/progress), title search, progress bar per book
+- Bookshelf with cover grid, continue-reading hero card, title search
 - Two reading modes: page-flip (horizontal swipe) and vertical scroll
+- Kindle-style tap zones: left/right edges navigate chapters, center toggles toolbar
 - Chapter navigation via slider and chapter list bottom sheet
 - Full-text search across all chapters with context previews
 - Bookmark system: add bookmarks from reader toolbar, view/jump/delete bookmarks
+- Aa menu: theme picker (4 themes), brightness, font size, line height, font family
+- Thin progress line at reader bottom (always visible, shows chapter/percent)
 - Brightness overlay control (in-app, does not affect system brightness)
 - Font settings: size (14–28), line height (1.2–2.5), font family (serif/sans-serif/monospace)
-- Three themes: light, dark, sepia
 
 ## Platform notes
 
